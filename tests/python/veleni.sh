@@ -36,6 +36,10 @@ tetto_token|test_uscita.TestUscita.test_tetto_dichiarato_quando_tronca|catene ol
 corse|test_cicli.TestCicli.test_ciclo_dentro_routine_resta_intero|ciclo spezzato
 corse_sempre|test_cicli.TestCicli.test_due_volte_di_fila_restano_due|ripetizioni di fila contate una
 ritorno|test_cicli.TestCicli.test_ritorno_sullo_stesso_documento_non_riapre|ritorno contato come apertura
+navigazione|test_rumore.TestRumore.test_navigazione_non_diventa_routine|navigazione diventata routine
+barriera|test_rumore.TestRumore.test_app_esclusa_spezza_lo_schema|app esclusa dentro una routine
+file_programma|test_rumore.TestRumore.test_file_dei_programmi_fuori_dagli_episodi|file di un programma entrato
+scartate|test_giudizio.TestGiudizio.test_non_compito_sparisce_e_torna_col_tempo_raddoppiato|la routine scartata è tornata
 '
 
 QUIETA="$(mktemp -d "${TMPDIR:-/tmp}/lancillotto-veleni.XXXXXX")"

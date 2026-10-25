@@ -194,6 +194,8 @@ Un lavoro ripreso sullo stesso oggetto entro 2 ore si ricuce nello stesso episod
 - Le routine sotto le 3 ripetizioni non si propongono.
 - **Avvio a freddo:** dal primo giorno vale anche la ripetizione dentro un episodio ("incolla×6 nella stessa coppia di app"), e l'output lo dichiara.
 - Una routine rifiutata torna solo se la firma cambia, per esempio con il tempo più che raddoppiato.
+- **Rumore (25/10/2026, dalla prima giornata vera).** Un pattern di sola navigazione (finestre, siti, clic, schede) cade: serve un gesto che produce o sposta qualcosa (`routine.GESTI_LAVORO`). Un'app esclusa o un campo protetto non sta dentro un pattern. Un file entra negli episodi solo se viene dalla persona: download, oppure entro 10 s da un gesto nel Finder o da salva, esporta o una voce di menu fuori dai terminali (`episodi.gesto_della_persona`).
+- **Giudizio di Claude.** Il motore trova schemi, non compiti. Claude registra con `lancillotto valuta` se ogni candidata è un compito (titolo e come) o no (perché). Una non-compito diventa `scartata` e torna con la regola delle rifiutate. La finestra, sezione "Cosa vede Claude", mostra solo i compiti giudicati (`oggi --json`: `compiti`, `lettura`).
 
 **Formato per Claude** (`oggi --json`, tetto 2000 token, obiettivo circa 400):
 

@@ -2,7 +2,8 @@
 
 La scrive solo Python. È incrementale (tabella cursore) e rigenerabile da zero (--da-zero).
 Sopravvivono a --da-zero: alias (i segnaposto restano gli stessi), routine_stato (proposta,
-confermata, rifiutata, automatizzata, con motivo e nota, per firma) e intento (le parole della
+confermata, rifiutata, automatizzata, scartata, con motivo e nota, e il giudizio di Claude con
+titolo e come, per firma) e intento (le parole della
 persona dalla revisione, per inizio dell'episodio).
 
   registro.sqlite (letto in una sola transazione: una fotografia, anche se il registratore scrive)
@@ -36,8 +37,11 @@ from .pseudonimi import Pseudonimi, parola_ammessa
 RIPRESA_MS = 4 * 3600000
 CONTESTO_MS = 2 * 3600000
 RAGGIUNGO_VALIDITA_S = 86400
-VERSIONE_ANALISI = 2
-STATI = ("proposta", "confermata", "rifiutata", "automatizzata")
+VERSIONE_ANALISI = 3
+STATI = ("proposta", "confermata", "rifiutata", "automatizzata", "scartata")
+# Il giudizio di Claude su una routine (melchior.valuta), persistente come lo stato.
+COLONNE_GIUDIZIO = (("titolo", "TEXT"), ("come", "TEXT"), ("giudizio", "TEXT"), ("perche", "TEXT"),
+                    ("giudicata", "TEXT"))
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS cursore(chiave TEXT PRIMARY KEY, valore TEXT);
@@ -65,7 +69,8 @@ CREATE TABLE IF NOT EXISTS routine_episodio(routine_id INTEGER, episodio_id INTE
 CREATE TABLE IF NOT EXISTS alias(tipo TEXT, h TEXT, segnaposto TEXT, PRIMARY KEY(tipo, h));
 CREATE TABLE IF NOT EXISTS routine_stato(id INTEGER PRIMARY KEY AUTOINCREMENT, firma_h TEXT UNIQUE,
   schema TEXT, stato TEXT NOT NULL DEFAULT 'proposta', motivo TEXT, con_cosa TEXT, nota TEXT,
-  tempo_rif_ms INTEGER, creata TEXT, aggiornata TEXT);
+  tempo_rif_ms INTEGER, creata TEXT, aggiornata TEXT, titolo TEXT, come TEXT, giudizio TEXT,
+  perche TEXT, giudicata TEXT);
 CREATE TABLE IF NOT EXISTS intento(t0 INTEGER PRIMARY KEY, testo TEXT, ts INTEGER);
 CREATE TABLE IF NOT EXISTS riga_vista(riga_id INTEGER, ts INTEGER, app_id INTEGER, fonte TEXT,
   schermo_id INTEGER);
@@ -112,6 +117,12 @@ def apri():
         conn.execute("PRAGMA user_version = %d" % VERSIONE_ANALISI)
         conn.commit()
     conn.executescript(SCHEMA)
+    # routine_stato è persistente: un'analisi di prima del giudizio prende le colonne nuove
+    presenti = {r[1] for r in conn.execute("PRAGMA table_info(routine_stato)")}
+    for nome, tipo in COLONNE_GIUDIZIO:
+        if nome not in presenti:
+            conn.execute("ALTER TABLE routine_stato ADD COLUMN %s %s" % (nome, tipo))
+    conn.commit()
     return conn
 
 
@@ -296,14 +307,15 @@ def ms_per_volta(r: dict) -> int:
 
 
 def stato_effettivo(rec, r: dict) -> str:
-    """Lo stato di una routine già vista. Una rifiutata torna proposta solo se è cambiata: il
+    """Lo stato di una routine già vista. Una rifiutata o scartata torna proposta solo se è cambiata: il
     tempo di una volta è più che raddoppiato rispetto a quando è stata rifiutata.
 
     Si confronta il tempo per volta, non il totale: il totale cresce da solo con i giorni
     registrati (fino ai 14 della conservazione) e farebbe tornare ogni rifiuto dei primi giorni.
     tempo_rif_ms è il tempo per volta al momento del rifiuto (melchior.rifiuta)."""
     stato = rec["stato"]
-    if stato == "rifiutata":
+    # una scartata (Claude: non è un compito) torna con la stessa regola, e va giudicata di nuovo
+    if stato in ("rifiutata", "scartata"):
         rif = rec["tempo_rif_ms"] or 0
         if rif and ms_per_volta(r) > 2 * rif:
             return "proposta"

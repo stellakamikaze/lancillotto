@@ -7,7 +7,11 @@
         │
         v
   n-gram di 3-8 simboli fatti solo di archi forti; occorrenze senza sovrapposizione
+        │  barriera: un'app esclusa o un campo protetto non sta dentro un n-gram (non si sa cosa c'era)
         │  supporto: occorrenze, episodi e giorni distinti; soglia 3 occorrenze
+        v
+  lavoro: un pattern di sola navigazione (finestre, siti, clic, schede) cade; serve almeno un
+        │ gesto che produce o sposta qualcosa (compila, copia, incolla, salva, apri, scarica, menu...)
         v
   pattern chiusi: cade un pattern se uno più lungo ha lo stesso numero di occorrenze
         │
@@ -39,6 +43,25 @@ MAX_CANDIDATI = 400
 MAX_ROUTINE = 40
 MAX_ESTESA = 24
 BUCO_MS = 60000
+# Le azioni che producono o spostano qualcosa. Il resto (finestra, visita, clic, nuova_scheda,
+# chiudi, ricarica, indirizzo, cerca, tasti, annulla) è navigazione: da sola non fa una routine.
+GESTI_LAVORO = {"compila", "copia", "taglia", "incolla", "salva", "salva_come", "esporta", "invia",
+                "stampa", "apri", "apri_allegato", "scarica", "crea", "modifica", "sposta", "elimina",
+                "menu", "nuovo"}
+
+
+def e_barriera(s: str) -> bool:
+    """Un passo di cui non si sa niente: app esclusa o campo protetto."""
+    return s.endswith(":escluso") or s.endswith(":protetto")
+
+
+def e_lavoro(s: str) -> bool:
+    """Vero se il simbolo (o un simbolo del blocco) è un gesto di lavoro."""
+    for x in epm.simboli_di(s):
+        parti = x.split(":")
+        if len(parti) > 1 and parti[1].split("×")[0] in GESTI_LAVORO:
+            return True
+    return False
 
 
 def distanza(a, b) -> int:
@@ -113,8 +136,10 @@ def candidati(sequenze: dict, forti: set) -> dict:
     for ep, seq in sequenze.items():
         s = [t["s"] for t in seq["token"]]
         for i in range(len(s)):
+            if e_barriera(s[i]):
+                continue
             for n in range(2, MAX_N + 1):
-                if i + n > len(s):
+                if i + n > len(s) or e_barriera(s[i + n - 1]):
                     break
                 if (s[i + n - 2], s[i + n - 1]) not in forti:
                     break
@@ -163,7 +188,7 @@ def _estendi(occ: list, sequenze: dict, forti: set, coperti: set) -> list:
                 if not (0 <= j < len(seq)) or (ep, j) in occupate:
                     continue
                 arco = (seq[j - 1]["s"], seq[j]["s"]) if verso == 1 else (seq[j]["s"], seq[i]["s"])
-                if arco in forti:
+                if arco in forti and not e_barriera(seq[j]["s"]):
                     passi.append((o, seq[j]["s"]))
             simboli = {s for _o, s in passi}
             if len(passi) < 0.8 * len(occ) or len(simboli) > 3:
@@ -213,7 +238,7 @@ def _corse_estese(occ: list, sequenze: dict, forti: set, coperti: set):
 def scopri(sequenze: dict, legami: list = (), raggiungibili=None) -> list:
     """Le routine, in ordine di punteggio. raggiungibili(simbolo) -> lista di canali."""
     forti = archi_forti(sequenze)
-    cand = chiusi(candidati(sequenze, forti))
+    cand = {g: o for g, o in chiusi(candidati(sequenze, forti)).items() if any(e_lavoro(s) for s in g)}
     info = {}
     for g, occ in cand.items():
         dati = [_occorrenza(sequenze[ep]["token"], i, len(g)) for ep, i in occ]

@@ -252,20 +252,58 @@ struct RigaPermesso: View {
 
 struct SezioneClaude: View {
     @ObservedObject var pannello: Pannello
+    @State private var copiato = false
+
+    private var frase: String {
+        if let il = pannello.lettaIlBreve {
+            if pannello.compiti.isEmpty {
+                return "Arturo ha letto il \(il): \(Pannello.schemi(pannello.schemi)), nessuno è un lavoro da delegare."
+            }
+            return "Arturo ha letto le tue giornate il \(il). Questi sono i lavori che può fare al posto tuo."
+        }
+        let quanti = pannello.schemi == 0 ? "Non ho ancora trovato gesti ripetuti."
+            : "Ho trovato \(Pannello.schemi(pannello.schemi)) ripetuti, ma non tutto ciò che si ripete è un lavoro."
+        return "Arturo non ha ancora letto le tue giornate. \(quanti) Quali compiti può fare lui lo decide Arturo, quando glielo chiedi."
+    }
+
+    /// Il prompt è l'azione principale finché c'è qualcosa da leggere.
+    private var promptPieno: Bool { pannello.lettaIl == nil || pannello.daLeggere > 0 }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             Testata(titolo: "Cosa vede Claude",
                     sintesi: "Claude legge solo riassunti, e solo quando glielo chiedi tu. I nomi di persone e clienti diventano segnaposto.")
             Foglio {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(pannello.routine == 0 ? "Ancora nessun lavoro ripetuto"
-                         : (pannello.routine == 1 ? "1 lavoro che ripeti" : "\(pannello.routine) lavori che ripeti"))
-                        .font(Stile.titoloRiga())
-                    Text(pannello.giorniAllaLettura > 0
-                         ? "Le proposte diventano affidabili dopo tre giorni di uso: ne manca\(pannello.giorniAllaLettura == 1 ? "" : "no") \(pannello.giorniAllaLettura)."
-                         : "Ci sono abbastanza giorni per chiedere ad Arturo dove ti può aiutare.")
-                        .font(Stile.testo(14)).foregroundStyle(Stile.grafite)
-                    Button("Apri la pagina completa") { pannello.apriPaginaCompleta() }.buttonStyle(StileAzione(piena: false))
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Compiti che Arturo può fare per te").font(Stile.titoloRiga())
+                    Text(frase).font(Stile.testo(14)).foregroundStyle(Stile.grafite).fixedSize(horizontal: false, vertical: true)
+                    if !pannello.compiti.isEmpty {
+                        VStack(spacing: 0) {
+                            Divider().overlay(Stile.filetto)
+                            ForEach(pannello.compiti) { c in
+                                RigaCompito(compito: c)
+                                Divider().overlay(Stile.filetto)
+                            }
+                        }
+                    }
+                    if pannello.lettaIl != nil && pannello.daLeggere > 0 {
+                        Text(pannello.daLeggere == 1 ? "C'è uno schema nuovo dall'ultima lettura: chiedi ad Arturo di guardarlo."
+                             : "Ci sono \(pannello.daLeggere) schemi nuovi dall'ultima lettura: chiedi ad Arturo di guardarli.")
+                            .font(Stile.testo(13)).foregroundStyle(Stile.cenere).fixedSize(horizontal: false, vertical: true)
+                    } else if pannello.lettaIl == nil && pannello.giorniAllaLettura > 0 {
+                        Text("Le proposte diventano affidabili dopo tre giorni di uso: ne manca\(pannello.giorniAllaLettura == 1 ? "" : "no") \(pannello.giorniAllaLettura). Puoi chiedere anche prima.")
+                            .font(Stile.testo(13)).foregroundStyle(Stile.cenere).fixedSize(horizontal: false, vertical: true)
+                    }
+                    HStack(spacing: 10) {
+                        Button(copiato ? "Copiato: incollalo in Arturo" : "Copia il prompt per Arturo") {
+                            pannello.copiaPrompt()
+                            copiato = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 4) { copiato = false }
+                        }
+                        .buttonStyle(StileAzione(piena: promptPieno))
+                        Button("Apri la pagina completa") { pannello.apriPaginaCompleta() }.buttonStyle(StileAzione(piena: false))
+                    }
+                    .padding(.top, 4)
                 }
             }
             VStack(alignment: .leading, spacing: 8) {
@@ -277,6 +315,47 @@ struct SezioneClaude: View {
                       : "I dati d'uso per chi mantiene Lancillotto sono spenti.")
             }
         }
+    }
+}
+
+/// Un compito su un filetto: cosa, come lo farebbe Claude, quanto pesa e a che punto è.
+struct RigaCompito: View {
+    let compito: VoceCompito
+
+    private var stato: (String, Color) {
+        switch compito.stato {
+        case "confermata": return ("Sì, da fare", Stile.passa)
+        case "automatizzata": return ("Già automatico", Stile.passa)
+        case "rifiutata": return ("No", Stile.cenere)
+        default: return ("Da decidere", Stile.azione)
+        }
+    }
+
+    private var quanto: String {
+        guard let v = compito.volte, let g = compito.giorni, let m = compito.minuti else {
+            return "Non visto negli ultimi giorni"
+        }
+        let volte = v == 1 ? "1 volta" : "\(v) volte"
+        let giorni = g == 1 ? "in 1 giorno" : "in \(g) giorni"
+        let tempo = m >= 60 ? "\(m / 60) h \(m % 60) min" : "\(m) min"
+        return "\(volte) \(giorni), \(tempo) in tutto"
+    }
+
+    var body: some View {
+        let (etichetta, colore) = stato
+        HStack(alignment: .firstTextBaseline, spacing: 14) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(compito.titolo).font(Stile.testo(14, .semibold)).foregroundStyle(Stile.inchiostro)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(compito.come).font(Stile.testo(13)).foregroundStyle(Stile.grafite)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(quanto).font(Stile.meta.monospacedDigit()).foregroundStyle(Stile.cenere)
+            }
+            Spacer(minLength: 8)
+            Badge(testo: etichetta, colore: colore)
+        }
+        .padding(.vertical, 12)
+        .accessibilityElement(children: .combine)
     }
 }
 

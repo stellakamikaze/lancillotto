@@ -10,6 +10,7 @@ ritorno sull'oggetto iniziale. Un lavoro ripreso sullo stesso oggetto entro 2 or
 
   eventi ordinati ──> simbolo + ancora (contesto per app: dominio, documento, campo)
         │                 nessun simbolo (schermo, servizio, campo_focus) -> fuori dagli episodi
+        │                 file senza un gesto della persona (lo scrive un programma) -> fuori
         v
   segmenta ──> taglio: inattivo>5 min | sonno | blocco | pausa | buco>5 min
         │      taglio: principale assente da 10 min -> il nuovo episodio parte dal primo
@@ -46,6 +47,15 @@ VOCI_MENU = {
     "paste and match style": "incolla", "incolla stile": "incolla",
 }
 TAGLI = {"sonno", "blocco", "pausa"}
+# Un evento sui file è un gesto della persona se arriva entro 10 s da un suo gesto sui file: un
+# comando, menu o clic nel Finder, oppure salva, salva con nome, esporta o una voce di menu in
+# un'altra app che non è un terminale. Gli altri li scrivono i programmi (cache, .pyc, font,
+# preferenze, database, Claude Code dal Terminale) e non entrano negli episodi. Il download resta sempre.
+GESTO_FILE_MS = 10000
+FINDER = "com.apple.finder"
+SALVA = {"salva", "salva_come", "esporta"}
+TERMINALI = {"com.apple.Terminal", "com.googlecode.iterm2", "com.mitchellh.ghostty", "dev.warp.Warp-Stable",
+             "io.alacritty", "net.kovidgoyal.kitty", "com.github.wez.wezterm"}
 
 
 def voce_menu(percorso: str) -> str:
@@ -95,6 +105,7 @@ class Contesto:
         self.ultima_copia = {}  # app_id -> ts dell'ultimo comando di copia
         self.ultima_copia_ts = None  # ts dell'ultimo comando di copia, in qualunque app
         self.ultimo_input = {}  # app_id -> ts dell'ultimo comando, menu o clic
+        self.ultimo_gesto_file = None  # ts dell'ultimo gesto della persona sui file (gesto_della_persona)
         self.ultimo_ogg = {}   # (app_id, tipo) -> (oggetto, ts) dell'ultimo documento o URL
 
     def ritorno(self, ev, chiave) -> bool:
@@ -140,6 +151,14 @@ class Contesto:
             return "f:%s" % doc[0]
         return "a:%s" % (ev.get("bundle") or app_id)
 
+    def gesto_della_persona(self, ev) -> bool:
+        """Vero se un evento sui file viene dalla persona: un download, o un suo gesto sui file
+        (Finder, salva, esporta, menu fuori dai terminali) nei GESTO_FILE_MS prima."""
+        if ev["tipo"] == "file_crea" and ev.get("cartella") == "download":
+            return True
+        t = self.ultimo_gesto_file
+        return t is not None and 0 <= ev["ts"] - t <= GESTO_FILE_MS
+
     def simbolo(self, ev):
         """Il simbolo dell'evento (o None) e aggiorna il contesto."""
         tipo, app_id, det = ev["tipo"], ev.get("app_id"), ev["det"]
@@ -147,6 +166,9 @@ class Contesto:
             return APP_ESCLUSA + ":escluso"
         if tipo in ("comando", "menu", "clic"):
             self.ultimo_input[app_id] = ev["ts"]
+            b = ev.get("bundle")
+            if b == FINDER or (b not in TERMINALI and (tipo == "menu" or azione_comando(ev) in SALVA)):
+                self.ultimo_gesto_file = ev["ts"]
         app = self.nome_app(ev)
         if tipo == "finestra":
             if app_id != self.primo_piano:
@@ -223,6 +245,8 @@ class Contesto:
                 return None
             return "%s:copia" % app
         if tipo.startswith("file_"):
+            if not self.gesto_della_persona(ev):
+                return None
             ext = (ev.get("ext") or "").lower() or "file"
             azione = {"file_crea": "crea", "file_mod": "modifica", "file_sposta": "sposta",
                       "file_elimina": "elimina"}[tipo] if tipo in (

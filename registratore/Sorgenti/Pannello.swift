@@ -6,6 +6,8 @@
 //           escludi app, dimentica oggi, telemetria spegni/accendi -> CLI
 //   ombra: CLI assente -> cliAssente = true, la finestra lo dice e indica installa.sh
 //   ombra: registro vuoto (primo giorno) -> numeri a zero, frase "ancora niente da mostrare"
+//   compiti: oggi --json -> compiti (giudicati da Claude con `lancillotto valuta`) e lettura
+//            lettura.data nil -> "Arturo non ha ancora letto"; compiti vuoti -> "nessun lavoro da delegare"
 
 import AppKit
 import Foundation
@@ -14,6 +16,18 @@ struct VoceApp: Identifiable, Equatable {
     let nome: String
     let minuti: Int
     var id: String { nome }
+}
+
+/// Un compito che Claude ha giudicato delegabile (lancillotto valuta). I numeri mancano se la
+/// routine non compare nell'analisi di oggi.
+struct VoceCompito: Identifiable, Equatable {
+    let id: Int
+    let titolo: String
+    let come: String
+    let stato: String          // proposta | confermata | automatizzata | rifiutata
+    let volte: Int?
+    let giorni: Int?
+    let minuti: Int?
 }
 
 final class Pannello: ObservableObject {
@@ -27,7 +41,10 @@ final class Pannello: ObservableObject {
     // Oggi
     @Published var minutiAttivi = 0
     @Published var app: [VoceApp] = []
-    @Published var routine = 0
+    @Published var compiti: [VoceCompito] = []
+    @Published var lettaIl: String?          // AAAA-MM-GG dell'ultimo giudizio di Claude, nil = mai
+    @Published var schemi = 0                // schemi ripetuti trovati dal motore oggi
+    @Published var daLeggere = 0             // schemi senza giudizio di Claude
     // Impostazioni
     @Published var testoSchermo = false
     @Published var telemetria = true
@@ -98,7 +115,15 @@ final class Pannello: ObservableObject {
             guard r.count >= 2, let n = r[0] as? String, let m = r[1] as? Int else { return nil }
             return VoceApp(nome: n, minuti: m)
         }
-        routine = ((j["routine"] as? [Any]) ?? []).count
+        compiti = ((j["compiti"] as? [[String: Any]]) ?? []).compactMap { c in
+            guard let id = c["id"] as? Int, let titolo = c["titolo"] as? String, let come = c["come"] as? String else { return nil }
+            return VoceCompito(id: id, titolo: titolo, come: come, stato: (c["stato"] as? String) ?? "proposta",
+                               volte: c["volte"] as? Int, giorni: c["giorni"] as? Int, minuti: c["minuti"] as? Int)
+        }
+        let l = (j["lettura"] as? [String: Any]) ?? [:]
+        lettaIl = l["data"] as? String
+        schemi = (l["schemi"] as? Int) ?? 0
+        daLeggere = (l["da_leggere"] as? Int) ?? 0
     }
 
     private func leggiImpostazioni() {
@@ -157,7 +182,7 @@ final class Pannello: ObservableObject {
     static let promptArturo = """
     Usa la skill lancillotto e leggi il registro di Lancillotto dei giorni che ci sono.
     1. Dimmi in tre righe che lavoro hai capito che faccio, e chiedimi se è giusto.
-    2. Poi proponimi al massimo tre compiti che ripeto e che puoi fare tu con Arturo: per ognuno quante volte e quanto tempo, e quale strumento di Arturo useresti.
+    2. Poi proponimi al massimo tre compiti che ripeto e che puoi fare tu con Arturo: per ognuno quante volte e quanto tempo, e quale strumento di Arturo useresti. Salva il tuo giudizio su ogni schema che guardi, così lo vedo nella finestra di Lancillotto.
     3. Non cambiare niente sul mio computer finché non ti dico quale provare.
     """
 
@@ -200,4 +225,15 @@ final class Pannello: ObservableObject {
     }
 
     var giorniAllaLettura: Int { max(0, 3 - giorniTenuti) }
+
+    /// "1 schema" / "6 schemi".
+    static func schemi(_ n: Int) -> String { n == 1 ? "1 schema" : "\(n) schemi" }
+
+    /// "25/10" dalla data dell'ultima lettura.
+    var lettaIlBreve: String? {
+        guard let d = lettaIl else { return nil }
+        let p = d.split(separator: "-")
+        guard p.count == 3, let m = Int(p[1]), let g = Int(p[2]) else { return d }
+        return "\(g)/\(m)"
+    }
 }

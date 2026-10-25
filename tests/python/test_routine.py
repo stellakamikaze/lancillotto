@@ -37,14 +37,16 @@ class TestRoutine(Base):
         self.assertRegex(per_nome["R1"]["schema"], r"Mail\b.*>.*Anteprima\b.*>.*Chrome\b")
 
     def test_rumore_alternato_non_diventa_routine(self):
-        """Due app che si alternano spesso (cmd+tab) non fanno una routine: serve il lift."""
+        """Quattro gesti di lavoro che si alternano a caso non fanno una routine: serve il lift.
+        Sono gesti di lavoro, non cambi di finestra, perché la sola navigazione cade già prima
+        (routine.e_lavoro) e il test non proverebbe più il lift."""
         rng = random.Random(3)
         sequenze = {}
         t = 0
         for ep in range(30):
             token = []
             for k in range(60):
-                s = rng.choice(["Slack:finestra", "Chrome:finestra", "Note:finestra", "Mail:finestra"])
+                s = rng.choice(["Slack:incolla", "Chrome:copia", "Note:compila:campo", "Mail:salva"])
                 if token and token[-1]["s"] == s:
                     continue
                 token.append({"s": s, "n": 1, "e0": t, "e1": t, "t0": t * 1000, "t1": t * 1000 + 30000})

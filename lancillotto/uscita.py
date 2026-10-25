@@ -165,9 +165,39 @@ def routine_righe(an, top: int = 5, stato=None) -> list:
     if stato:
         sql, arg = "SELECT * FROM routine WHERE stato = ? ORDER BY punteggio DESC, id LIMIT ?", (stato, top)
     else:
-        sql, arg = ("SELECT * FROM routine WHERE stato != 'rifiutata' ORDER BY punteggio DESC, id LIMIT ?",
-                    (top,))
+        sql, arg = ("SELECT * FROM routine WHERE stato NOT IN ('rifiutata', 'scartata')"
+                    " ORDER BY punteggio DESC, id LIMIT ?", (top,))
     return an.execute(sql, arg).fetchall()
+
+
+ORDINE_COMPITI = {"proposta": 0, "confermata": 1, "automatizzata": 2, "rifiutata": 3}
+
+
+def compiti(an, massimo: int = 10) -> list:
+    """I compiti che Claude ha giudicato delegabili (melchior.valuta), con i numeri dell'analisi
+    di oggi se la routine c'è ancora. Le scartate non ci sono: non sono compiti."""
+    out = []
+    for s in an.execute("SELECT s.id, s.titolo, s.come, s.stato, s.giudicata, r.volte, r.giorni,"
+                        " r.tempo_totale_ms, r.punteggio FROM routine_stato s LEFT JOIN routine r ON r.id = s.id"
+                        " WHERE s.giudizio = 'compito' AND s.stato != 'scartata'"):
+        d = {"id": s["id"], "titolo": s["titolo"], "come": s["come"], "stato": s["stato"],
+             "giudicata": s["giudicata"]}
+        if s["volte"] is not None:
+            d.update({"volte": s["volte"], "giorni": s["giorni"], "minuti": minuti(s["tempo_totale_ms"])})
+        out.append((ORDINE_COMPITI.get(s["stato"], 9), -(s["punteggio"] or 0), s["id"], d))
+    out.sort(key=lambda x: x[:3])
+    return [x[3] for x in out[:massimo]]
+
+
+def lettura(an) -> dict:
+    """Quando Claude ha letto l'ultima volta e quanti schemi di oggi aspettano un giudizio.
+    data null = Claude non ha mai giudicato niente."""
+    data = an.execute("SELECT MAX(giudicata) FROM routine_stato WHERE giudizio IS NOT NULL").fetchone()[0]
+    righe = an.execute("SELECT r.stato, s.giudizio, s.stato AS deciso FROM routine r"
+                       " LEFT JOIN routine_stato s ON s.id = r.id").fetchall()
+    da_leggere = sum(1 for r in righe if r["stato"] == "proposta" and (r["giudizio"] is None or r["deciso"] == "scartata"))
+    return {"data": data, "schemi": len(righe), "scartate": sum(1 for r in righe if r["stato"] == "scartata"),
+            "da_leggere": da_leggere}
 
 
 def limiti_giorno(reg, ps, an, t0: int, t1: int) -> list:
@@ -218,6 +248,8 @@ def giorno(reg, an, ps, data: str, tetto: int = TETTO_TOKEN) -> dict:
         "app": tempo_per_app(reg, ps, t0, t1)[:8],
         "episodi": [episodio_breve(an, r) for r in eps],
         "routine": [routine_voce(r) for r in routine_righe(an, 5)],
+        "compiti": compiti(an),
+        "lettura": lettura(an),
     }
     return limita(involucro("L0", corpo, limiti_giorno(reg, ps, an, t0, t1)), tetto)
 

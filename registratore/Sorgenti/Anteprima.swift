@@ -1,5 +1,6 @@
 // Anteprima.swift: `Lancillotto --anteprima CARTELLA` disegna in PNG la guida e la finestra, chiare e scure,
-// con dati finti. Serve a guardare l'interfaccia senza aprirla sullo schermo (QA, README). Non legge il
+// con dati finti; la sezione Cosa vede Claude anche nei suoi tre stati (mai letta, letta senza compiti,
+// con compiti). Serve a guardare l'interfaccia senza aprirla sullo schermo (QA, README). Non legge il
 // registro, non lancia la CLI, non tocca impostazioni né permessi.
 
 import AppKit
@@ -13,7 +14,16 @@ enum Anteprima {
         let uscita = URL(fileURLWithPath: cartella, isDirectory: true)
         try? FileManager.default.createDirectory(at: uscita, withIntermediateDirectories: true)
         let p = Pannello(cartella: uscita)
-        p.stato = "acceso"; p.permessoAX = true; p.minutiAttivi = 274; p.giorniTenuti = 2; p.routine = 3
+        p.stato = "acceso"; p.permessoAX = true; p.minutiAttivi = 274; p.giorniTenuti = 2
+        let compiti = [
+            VoceCompito(id: 1, titolo: "Copiare i dati delle fatture nel portale dei fornitori",
+                        come: "Claude legge i PDF allegati in Mail e ti prepara i valori da incollare.",
+                        stato: "proposta", volte: 11, giorni: 4, minuti: 95),
+            VoceCompito(id: 4, titolo: "Rinominare e archiviare i preventivi firmati",
+                        come: "Claude sposta i PDF nella cartella del cliente con il nome giusto.",
+                        stato: "confermata", volte: 6, giorni: 3, minuti: 18),
+        ]
+        p.compiti = compiti; p.lettaIl = "2026-10-25"; p.schemi = 6; p.daLeggere = 1
         p.app = [VoceApp(nome: "Mail", minuti: 96), VoceApp(nome: "Firefox", minuti: 81), VoceApp(nome: "Excel", minuti: 52),
                  VoceApp(nome: "Anteprima", minuti: 23), VoceApp(nome: "Finder", minuti: 14)]
         p.telemetria = true; p.codaTelemetria = ["permesso ax:si", "giorno ore:3", "guida fatto:ok"]
@@ -38,6 +48,15 @@ enum Anteprima {
                 fatte += disegna(vista, NSSize(width: 860, height: 700), aspetto,
                                  uscita.appendingPathComponent("finestra-\(s.rawValue)-\(nome).png"))
             }
+            let stati: [(String, [VoceCompito], String?, Int)] = [("mai-letta", [], nil, 6), ("letta-vuota", [], "2026-10-25", 0)]
+            for (variante, c, letta, daLeggere) in stati {
+                p.compiti = c; p.lettaIl = letta; p.daLeggere = daLeggere
+                fatte += disegna(Dettaglio(pannello: p, scelta: .claude).frame(maxHeight: .infinity, alignment: .top)
+                                    .background(Stile.carta).foregroundStyle(Stile.inchiostro).tint(Stile.azione),
+                                 NSSize(width: 670, height: 700), aspetto,
+                                 uscita.appendingPathComponent("finestra-claude-\(variante)-\(nome).png"))
+            }
+            p.compiti = compiti; p.lettaIl = "2026-10-25"; p.daLeggere = 1
             for passo in PassoGuida.allCases {
                 let m = ModelloGuida(pannello: p)
                 m.passo = passo

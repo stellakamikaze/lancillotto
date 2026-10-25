@@ -9,7 +9,7 @@ from __future__ import annotations
 import html
 import json
 
-from . import impostazioni, percorsi, uscita
+from . import impostazioni, melchior, percorsi, uscita
 
 CSS = """
 :root{--sfondo:#fbfaf7;--testo:#1d1d1f;--tenue:#5f5f66;--bordo:#dedbd2;--riquadro:#ffffff;
@@ -67,6 +67,43 @@ def _peso() -> list:
     return out
 
 
+STATO_COMPITO = {"proposta": "da decidere", "confermata": "sì, da fare", "rifiutata": "no",
+                 "automatizzata": "già automatico"}
+
+
+def data_breve(iso: str) -> str:
+    """2026-10-25 -> 25/10."""
+    a, m, g = iso.split("-")
+    return "%d/%d" % (int(g), int(m))
+
+
+def in_parole(schema: str) -> str:
+    return "; ".join(melchior.passaggio(s) for s in schema.split(" > "))
+
+
+def _compiti(an) -> str:
+    let = uscita.lettura(an)
+    voci = uscita.compiti(an)
+    if let["data"] is None:
+        testa = ("<p>Arturo non ha ancora letto le tue giornate. Il motore ha trovato %d schemi ripetuti: "
+                 "quali sono lavori che Claude può fare lo decide Arturo, quando glielo chiedi.</p>" % let["schemi"])
+    elif not voci:
+        testa = ("<p>Arturo ha letto il %s: %d schemi, nessuno è un lavoro da delegare.</p>"
+                 % (e(data_breve(let["data"])), let["schemi"]))
+    else:
+        testa = "<p>Arturo ha letto il %s.</p>" % e(data_breve(let["data"]))
+    righe = []
+    for c in voci:
+        numeri = ("%d volte in %d giorni, %d minuti" % (c["volte"], c["giorni"], c["minuti"])
+                  if "volte" in c else "non visto negli ultimi giorni")
+        righe.append([c["titolo"], c["come"], numeri, STATO_COMPITO.get(c["stato"], c["stato"])])
+    corpo = _tabella(["Compito", "Cosa farebbe Claude", "Quanto", "Stato"], righe) if righe else ""
+    coda = ""
+    if let["data"] is not None and let["da_leggere"]:
+        coda = '<p class="tenue">%d schemi nuovi dall\'ultima lettura: chiedi ad Arturo.</p>' % let["da_leggere"]
+    return testa + corpo + coda
+
+
 def genera(reg, an, ps, data: str) -> str:
     l0 = uscita.giorno(reg, an, ps, data)
     l0_routine = uscita.routine(an, 5)
@@ -88,6 +125,7 @@ def genera(reg, an, ps, data: str) -> str:
              "ciò che Claude riceve quando gli chiedi di guardare Lancillotto: i titoli delle finestre "
              "escono solo con parole comuni, ogni altra parola diventa un segnaposto come [P3], i siti "
              "poco noti diventano [SITO_2].</p>" % e(data)]
+    parti.append("<h2>Compiti che Arturo può fare per te</h2><section>%s</section>" % _compiti(an))
     parti.append("<h2>Livello 0: i riassunti</h2><section>")
     parti.append("<p>Tempo attivo: <b>%s minuti</b>, in pausa: %s minuti.</p>" % (e(l0.get("attivo_min")),
                                                                                e(l0.get("pausa_min"))))
@@ -95,10 +133,18 @@ def genera(reg, an, ps, data: str) -> str:
     parti.append("<p><b>Lavori più lunghi</b></p>")
     parti.append(_tabella(["N.", "Ora", "Minuti", "Passaggi"],
                           [[x["id"], x["ora"], x["min"], x["firma"]] for x in l0.get("episodi", [])]))
-    parti.append("<p><b>Routine</b></p>")
-    parti.append(_tabella(["N.", "Passaggi", "Volte", "Giorni", "Minuti in tutto", "Stato"],
-                          [[x["id"], x["schema"], x["volte"], x["giorni"], x["tempo_tot_min"], x["stato"]]
-                           for x in l0_routine.get("routine", [])]))
+    parti.append("<p><b>Schemi trovati dal motore</b> <span class=\"tenue\">(ripetizioni, non ancora "
+                 "compiti: il giudizio è di Arturo)</span></p>")
+    giudizi = {r["id"]: r for r in an.execute("SELECT id, giudizio, perche FROM routine_stato")}
+
+    def giudizio(i):
+        g = giudizi.get(i)
+        if g is None or g["giudizio"] is None:
+            return "da leggere"
+        return "compito" if g["giudizio"] == "compito" else "non è un compito: %s" % (g["perche"] or "")
+    parti.append(_tabella(["N.", "In parole", "Volte", "Giorni", "Minuti in tutto", "Giudizio di Arturo"],
+                          [[x["id"], in_parole(x["schema"]), x["volte"], x["giorni"], x["tempo_tot_min"],
+                            giudizio(x["id"])] for x in l0_routine.get("routine", [])]))
     if l0.get("limiti"):
         parti.append("<p class=\"tenue\">Limiti: %s</p>" % e("; ".join(l0["limiti"])))
     parti.append(_json(l0))

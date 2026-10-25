@@ -47,7 +47,7 @@ _BROWSER = ("com.apple.Safari|com.apple.SafariTechnologyPreview|com.google.Chrom
 _SENSORI = "app|ax|input|schermo|ocr|testo|file|appunti|avvio_login|menu"
 _VERBI = ("stato|oggi|giorno|settimana|routine|episodi|episodio|catene|cerca|conta|verifica|testo|conferma|rifiuta|"
           "automatizzata|rivedi|mostra|raggiungo|pausa|riprendi|escludi|dimentica|cancella-tutto|telemetria|aggiorna|"
-          "precedenti|analizza")
+          "precedenti|analizza|valuta")
 
 # L'elenco chiuso, uguale a EVENTI_LANCILLOTTO in arturo/server/lancillotto.js (caso L03 del server).
 EVENTI = {

@@ -34,5 +34,9 @@ Un test vale solo se diventa rosso su una versione rotta del codice. Ogni veleno
 | `corse` | `routine._corse_estese` non unisce mai le ripetizioni attaccate | `test_cicli.TestCicli.test_ciclo_dentro_routine_resta_intero` | la routine Mail > Anteprima > sei copia e incolla esce a pezzi: `ciclo spezzato` |
 | `corse_sempre` | `routine._corse_estese` unisce sempre le ripetizioni attaccate, anche senza contorno comune | `test_cicli.TestCicli.test_due_volte_di_fila_restano_due` | una routine fatta due volte di fila conta una: `ripetizioni di fila contate una` |
 | `ritorno` | `episodi.Contesto.ritorno` dice sempre di no | `test_cicli.TestCicli.test_ritorno_sullo_stesso_documento_non_riapre` | ogni ritorno su Anteprima diventa "apri allegato": `ritorno contato come apertura` |
+| `navigazione` | `routine.e_lavoro` dice che ogni simbolo è lavoro | `test_rumore.TestRumore.test_navigazione_non_diventa_routine` | scheda nuova, Instagram e clic diventano routine: `navigazione diventata routine` |
+| `barriera` | `routine.e_barriera` non ferma mai un n-gram | `test_rumore.TestRumore.test_app_esclusa_spezza_lo_schema` | Mail > app esclusa > Chrome diventa routine: `app esclusa dentro una routine` |
+| `file_programma` | `episodi.Contesto.gesto_della_persona` dice sempre di sì | `test_rumore.TestRumore.test_file_dei_programmi_fuori_dagli_episodi` | i .pyc scritti dal Terminale prendono un simbolo: `file di un programma entrato` |
+| `scartate` | `uscita.routine_righe` esclude solo le rifiutate | `test_giudizio.TestGiudizio.test_non_compito_sparisce_e_torna_col_tempo_raddoppiato` | la routine che Claude ha giudicato non-compito resta in elenco: `la routine scartata è tornata` |
 
 Il test dei hook di Arturo (`test_melchior.TestMelchior.test_hook_di_arturo_non_segnalano`) ha la sua controprova dentro: la stessa nota con un token `ghp_` deve far parlare `memory-write-scanner.py`, altrimenti il silenzio di prima non prova niente.

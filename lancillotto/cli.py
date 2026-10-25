@@ -19,6 +19,7 @@ Livello 2, testo redatto, solo con il clic della persona nel menu:
 Melchior:
   conferma ID --descrizione "..." --trigger "..." --trigger "..." --domanda "..." [--slug S]
   rifiuta ID "motivo" | automatizzata ID "con cosa" | precedenti ["testo"]
+  valuta ID --compito "titolo" --come "cosa farebbe Claude" | valuta ID --non-compito "perché"
 Analisi:
   analizza [--da-zero]
 
@@ -586,6 +587,10 @@ def cmd_automatizzata(a) -> int:
     return _melchior(melchior.automatizzata, a.id, a.con_cosa)
 
 
+def cmd_valuta(a) -> int:
+    return _melchior(melchior.valuta, a.id, a.compito, a.come, a.non_compito)
+
+
 def cmd_precedenti(a) -> int:
     if percorsi.registro().exists():
         analisi.analizza()
@@ -738,6 +743,11 @@ def parser() -> argparse.ArgumentParser:
     p = verbo("automatizzata", cmd_automatizzata, "la routine è già automatizzata")
     p.add_argument("id", type=int)
     p.add_argument("con_cosa")
+    p = verbo("valuta", cmd_valuta, "il giudizio di Claude su una routine: compito o no")
+    p.add_argument("id", type=int)
+    p.add_argument("--compito", default=None, help="titolo del compito, con le parole della persona")
+    p.add_argument("--come", default=None, help="cosa farebbe Claude e con quale strumento")
+    p.add_argument("--non-compito", dest="non_compito", default=None, help="perché non è un compito da delegare")
     p = verbo("precedenti", cmd_precedenti, "routine già decise e note vicine")
     p.add_argument("testo", nargs="?", default=None)
     p = verbo("analizza", cmd_analizza, "aggiorna l'analisi")

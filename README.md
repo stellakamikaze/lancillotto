@@ -66,7 +66,7 @@ Nella barra dei menu in alto compare l'icona di Lancillotto: verde se registra, 
 Dall'icona, "Apri Lancillotto" apre la finestra con quattro sezioni:
 
 - **Oggi**: se sta annotando, i permessi, dove è andato il tempo della giornata;
-- **Cosa vede Claude**: quanti lavori ripetuti ha trovato e cosa esce dal Mac;
+- **Cosa vede Claude**: i compiti che Arturo ha giudicato delegabili dopo averti letto, con quante volte e quanto tempo, e cosa esce dal Mac;
 - **Privacy**: testo delle finestre e dati d'uso, app e siti da escludere, cosa dimenticare;
 - **Arturo**: la domanda da fare ad Arturo e un pulsante che la apre nel Terminale.
 

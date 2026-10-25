@@ -7,6 +7,9 @@
 - rifiuta ID "motivo": lo stato diventa rifiutata e una riga va nella nota unica
   feedback/feedback-lancillotto-cosa-non-automatizzare.md.
 - automatizzata ID "con cosa": lo stato e, se la nota c'è, una riga nella nota.
+- valuta ID --compito "titolo" --come "..." | --non-compito "perché": il giudizio di Claude su una
+  routine, solo in analisi.sqlite (nessuna nota). Lo legge la finestra di Lancillotto (oggi --json,
+  compiti e lettura). Una non-compito diventa scartata e torna solo se il tempo per volta raddoppia.
 - precedenti ["testo"]: le routine già decise e le note vicine (melchior_recall.py se c'è,
   altrimenti una ricerca semplice sui file pattern-lancillotto-*).
 Memoria = LANCILLOTTO_MEMORIA_DIR o ~/.claude/data/memory. Se la cartella non esiste, niente nota:
@@ -357,6 +360,43 @@ def automatizzata(rid: int, con_cosa: str) -> dict:
         an.close()
 
 
+def valuta(rid: int, titolo: str = None, come: str = None, non_compito: str = None) -> dict:
+    """Il giudizio di Claude: un compito che può fare (titolo e come, con parole della persona)
+    oppure no (perché). Scrive solo in analisi.sqlite: è una scrittura locale, senza nota."""
+    if non_compito is not None and (titolo or come):
+        raise Rifiutato("o --compito con --come, o --non-compito: non tutti e due")
+    if non_compito is None and not (titolo and come):
+        raise Rifiutato("serve --compito \"titolo\" con --come \"cosa farebbe Claude\", oppure --non-compito \"perché\"")
+    if non_compito is not None:
+        valida([("perché", non_compito)])
+    else:
+        valida([("titolo", titolo), ("come", come)])
+    an = analisi.apri()
+    try:
+        rec, r = _routine(an, rid)
+        if rec is None:
+            raise Rifiutato("routine %s non trovata" % rid)
+        oggi = dt.date.today().isoformat()
+        if non_compito is not None:
+            tempo = analisi.ms_per_volta(dict(r)) if r is not None else (rec["tempo_rif_ms"] or 0)
+            an.execute("UPDATE routine_stato SET stato = 'scartata', giudizio = 'non_compito', perche = ?,"
+                       " titolo = NULL, come = NULL, tempo_rif_ms = ?, giudicata = ?, aggiornata = ? WHERE id = ?",
+                       (non_compito.strip(), tempo, oggi, oggi, rid))
+            an.execute("UPDATE routine SET stato = 'scartata' WHERE id = ?", (rid,))
+            an.commit()
+            return {"routine": rid, "giudizio": "non_compito", "stato": "scartata"}
+        # una scartata giudicata di nuovo come compito torna proposta; gli altri stati restano
+        stato = "proposta" if rec["stato"] == "scartata" else rec["stato"]
+        an.execute("UPDATE routine_stato SET stato = ?, giudizio = 'compito', titolo = ?, come = ?, perche = NULL,"
+                   " giudicata = ?, aggiornata = ? WHERE id = ?",
+                   (stato, titolo.strip(), come.strip(), oggi, oggi, rid))
+        an.execute("UPDATE routine SET stato = ? WHERE id = ?", (stato, rid))
+        an.commit()
+        return {"routine": rid, "giudizio": "compito", "stato": stato}
+    finally:
+        an.close()
+
+
 # --- precedenti ---------------------------------------------------------------------------
 
 def script_recall():
@@ -395,8 +435,9 @@ def precedenti(testo: str = None) -> dict:
     an = analisi.apri()
     try:
         decise = []
-        for r in an.execute("SELECT id, schema, stato, motivo, con_cosa, nota, aggiornata FROM routine_stato"
-                            " WHERE stato IN ('confermata', 'rifiutata', 'automatizzata') ORDER BY id"):
+        for r in an.execute("SELECT id, schema, stato, motivo, con_cosa, nota, aggiornata, titolo, perche"
+                            " FROM routine_stato WHERE stato IN ('confermata', 'rifiutata', 'automatizzata', 'scartata')"
+                            " OR giudizio IS NOT NULL ORDER BY id"):
             try:
                 schema = json.loads(r["schema"] or "[]")
             except ValueError:
@@ -406,6 +447,10 @@ def precedenti(testo: str = None) -> dict:
                 voce["motivo"] = r["motivo"]
             if r["con_cosa"]:
                 voce["con_cosa"] = r["con_cosa"]
+            if r["titolo"]:
+                voce["compito"] = r["titolo"]
+            if r["perche"]:
+                voce["non_compito"] = r["perche"]
             if r["nota"]:
                 voce["nota"] = os.path.basename(r["nota"])
             decise.append(voce)

@@ -44,6 +44,14 @@ def _corse_sempre(occ, sequenze, forti, coperti):
     return [(ep, i, n) for ep, i, n, _k in routine._corse(occ)]
 
 
+def _righe_con_scartate(an, top=5, stato=None):
+    if stato:
+        return an.execute("SELECT * FROM routine WHERE stato = ? ORDER BY punteggio DESC, id LIMIT ?",
+                          (stato, top)).fetchall()
+    return an.execute("SELECT * FROM routine WHERE stato != 'rifiutata' ORDER BY punteggio DESC, id LIMIT ?",
+                      (top,)).fetchall()
+
+
 def _involucro_nudo(livello, corpo, limiti=None):
     d = dict(corpo)
     d["limiti"] = list(limiti or [])
@@ -75,6 +83,10 @@ VELENI = {
     "corse": lambda: [mock.patch.object(routine, "_corse_estese", lambda *a: None)],
     "corse_sempre": lambda: [mock.patch.object(routine, "_corse_estese", _corse_sempre)],
     "ritorno": lambda: [mock.patch.object(episodi.Contesto, "ritorno", lambda self, ev, chiave: False)],
+    "navigazione": lambda: [mock.patch.object(routine, "e_lavoro", lambda s: True)],
+    "barriera": lambda: [mock.patch.object(routine, "e_barriera", lambda s: False)],
+    "file_programma": lambda: [mock.patch.object(episodi.Contesto, "gesto_della_persona", lambda self, ev: True)],
+    "scartate": lambda: [mock.patch.object(uscita, "routine_righe", _righe_con_scartate)],
 }
 
 
