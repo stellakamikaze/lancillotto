@@ -1,0 +1,262 @@
+# Vocabolario dell'allowlist: le sole parole dei titoli e dei nomi file che escono verso Claude.
+# Una o più parole per riga, minuscole. Ogni parola qui è generica: niente nomi di persone,
+# aziende, clienti o luoghi. Dopo la riga [app] ci sono i nomi delle app note.
+# La persona può aggiungere parole sue in vocabolario.txt nella cartella dati.
+
+# --- parole funzionali italiane
+a ad al allo alla ai agli alle all da dal dallo dalla dai dagli dalle dall di del dello della dei degli delle dell
+in nel nello nella nei negli nelle nell su sul sullo sulla sui sugli sulle sull con col coi per tra fra
+il lo la i gli le l un uno una un' d c e ed o od ma se che chi cui non né anche come dove quando quanto
+più meno molto poco tutto tutti tutte ogni altro altri altra altre questo questa questi queste quello quella
+quelli quelle mio mia miei mie tuo tua tuoi tue suo sua suoi sue nostro nostra nostri nostre vostro vostra loro
+io tu lui lei noi voi essi è sono sei siamo siete era erano sarà ha hai hanno ho abbiamo avete
+qui qua là lì già ancora sempre mai poi prima dopo ora oggi ieri domani adesso subito presto tardi
+sì no forse ecco circa solo proprio insieme senza verso entro oltre sotto sopra dentro fuori davanti dietro
+# --- parole funzionali inglesi
+the of and to for from with without by on at as is are was were be been it its this that these those
+an or not no yes if then than but so all any each every some more most less new old my your our their
+you we they he she me us them what which who when where how why here there now today yesterday tomorrow
+into onto over under up down out off about after before between during per via vs etc
+# --- lavoro, ufficio, amministrazione
+fattura fatture fatturazione fatturato preventivo preventivi offerta offerte ordine ordini contratto contratti
+riunione riunioni incontro incontri chiamata chiamate call meeting agenda verbale verbali minuta
+bozza bozze documento documenti foglio fogli report rapporto rapporti relazione relazioni sintesi riepilogo
+nota note appunti appunto promemoria elenco lista liste tabella tabelle modulo moduli scheda schede
+progetto progetti attività compito compiti task scadenza scadenze consegna consegne pianificazione piano piani
+budget costi costo spese spesa ricavi entrate uscite incasso incassi pagamento pagamenti saldo acconto rata rate
+bonifico bonifici ricevuta ricevute scontrino nota spese rimborso rimborsi iva imponibile totale subtotale
+importo importi prezzo prezzi listino tariffa tariffe sconto sconti quota quote canone abbonamento abbonamenti
+cliente clienti fornitore fornitori fornitura forniture partner collaboratore collaboratori collega colleghi
+dipendente dipendenti personale risorse umane ufficio uffici sede amministrazione contabilità bilancio bilanci
+commercialista consulente consulenza consulenze legale avvocato notaio banca conto conti estratto movimento movimenti
+richiesta richieste risposta risposte domanda domande reclamo reclami ticket assistenza supporto segnalazione
+pratica pratiche protocollo dossier archivio archivi fascicolo cartella cartelle allegato allegati copia copie
+firma firmato firmata firme timbro autorizzazione delega certificato certificati dichiarazione autocertificazione
+gara gare bando bandi avviso candidatura domanda offerta tecnica economica capitolato disciplinare lotto lotti
+mandato procura nomina incarico incarichi lettera lettere comunicazione comunicazioni circolare
+magazzino inventario spedizione spedizioni corriere consegna ritiro reso resi tracking pacco pacchi
+prodotto prodotti servizio servizi articolo articoli codice codici catalogo categoria categorie
+vendita vendite acquisto acquisti ordine evaso evasi annullato sospeso confermato confermata
+anagrafica anagrafiche registro registri giornale prima nota
+ore ora orario orari turno turni presenze ferie permesso permessi malattia straordinari
+stipendio stipendi busta paga cedolino cedolini
+campagna campagne marketing comunicato stampa newsletter evento eventi programma programmi calendario
+post social contenuto contenuti articolo blog sito pagina pagine landing banner grafica immagine immagini foto video
+presentazione presentazioni slide deck pitch brief concept proposta proposte strategia analisi ricerca studio
+revisione revisioni correzione correzioni versione versioni definitivo definitiva finale provvisorio
+mensile settimanale annuale trimestrale giornaliero giornaliera quotidiano storico
+interno interna esterno esterna riservato riservata pubblico pubblica privato privata
+srl spa snc sas società azienda aziende impresa imprese ditta studio associazione fondazione ente enti comune
+regione provincia ministero agenzia camera commercio
+# --- interfaccia, app, comandi
+file nuovo nuova nuovi nuove apri aperto aperta chiudi chiuso salva salvato salvataggio esporta esportazione
+importa importazione carica caricamento scarica download upload modifica modifiche modificato elimina eliminato
+cancella cancellato rinomina sposta duplica duplicato copia incolla taglia annulla ripeti seleziona selezione
+cerca ricerca trova sostituisci filtra filtro filtri ordina ordinamento raggruppa vista viste visualizza
+mostra nascondi espandi comprimi ingrandisci riduci zoom stampa anteprima condividi invia inviato inviata
+ricevi ricevuto ricevuta rispondi inoltra inoltrato allega bozza bozze posta inbox arrivo in arrivo uscita
+spam cestino archiviato archivia etichetta etichette contrassegna letto letti non letti preferiti importante
+contatti contatto rubrica gruppo gruppi canale canali messaggio messaggi chat thread conversazione conversazioni
+notifica notifiche impostazioni preferenze opzioni account profilo utente utenti accesso esci entra
+aiuto guida informazioni info finestra finestre scheda schede pannello menu barra strumenti
+modifica formato inserisci visualizza strumenti dati tabella grafico grafici formula formule colonna colonne
+riga righe cella celle foglio cartella di lavoro intervallo somma media conteggio pivot
+testo paragrafo titolo titoli sottotitolo intestazione piè pagina pagina pagine stile stili carattere
+elenco puntato numerato immagine forma commento commenti revisione traccia modifiche
+documento senza titolo untitled copia di bozza sola lettura compatibilità
+nuovo messaggio nuova cartella nuova scheda nuova finestra
+home dashboard panoramica riepilogo elenco dettaglio dettagli storico cronologia attività log
+caricamento in corso errore errori avviso avvisi conferma confermare annullare ok fatto completato completata
+pronto attesa pendente sospeso bloccato aperto chiuso attivo attiva disattivo
+login logout registrati iscriviti abbonati prova gratuita
+oggi domani ieri settimana settimane mese mesi anno anni giorno giorni data date
+# --- mesi e giorni
+gennaio febbraio marzo aprile maggio giugno luglio agosto settembre ottobre novembre dicembre
+gen feb mar apr mag giu lug ago set ott nov dic
+lunedì martedì mercoledì giovedì venerdì sabato domenica lun mer gio ven sab dom
+january february march april may june july august september october november december
+jan feb mar apr jun jul aug sep sept oct nov dec
+monday tuesday wednesday thursday friday saturday sunday mon tue wed thu fri sat sun
+mattina pomeriggio sera notte morning afternoon evening night
+# --- numeri a parole
+uno due tre quattro cinque sei sette otto nove dieci primo secondo terzo quarto quinto
+one two three four five six seven eight nine ten first second third fourth fifth
+# --- formati ed estensioni
+pdf doc docx xls xlsx xlsm csv tsv txt rtf md odt ods odp ppt pptx key pages numbers
+jpg jpeg png gif heic tiff svg webp mp3 mp4 mov m4a wav zip rar tar gz dmg pkg eml ics vcf json xml html
+# --- inglese: lavoro, ufficio
+invoice invoices billing quote quotes estimate estimates offer offers order orders contract contracts agreement
+meeting meetings call calls agenda minutes notes note draft drafts document documents sheet sheets spreadsheet
+report reports summary overview review reviews brief briefs proposal proposals plan plans planning roadmap
+project projects task tasks todo deadline deadlines delivery deliverable deliverables milestone milestones
+budget cost costs expense expenses revenue income payment payments balance deposit installment transfer
+receipt receipts refund refunds tax taxes vat total subtotal amount amounts price prices pricing rate rates
+discount discounts fee fees subscription subscriptions plan renewal
+client clients customer customers supplier suppliers vendor vendors partner partners contractor contractors
+employee employees staff team teams office offices department hr human resources finance accounting legal
+request requests response responses question questions issue issues ticket tickets support help desk
+case cases file files folder folders attachment attachments copy copies record records archive
+signature signed approval approved pending rejected certificate certificates statement statements
+tender bid bids application applications form forms submission submissions
+inventory warehouse shipping shipment shipments tracking package packages return returns
+product products service services item items code codes catalog catalogue category categories
+sale sales purchase purchases purchasing procurement
+schedule schedules calendar event events program programme timesheet timesheets hours shift shifts
+leave holiday holidays vacation sick overtime payroll payslip salary
+campaign campaigns marketing press release newsletter content post posts blog website page pages
+image images photo photos video videos presentation presentations slides pitch concept strategy analysis research
+version versions final revision revisions edit edits edited internal external confidential public private
+ltd llc inc corp company companies business organization foundation association agency
+monthly weekly yearly annual quarterly daily
+# --- inglese: interfaccia
+new open opened close closed save saved export import upload download downloads edit delete deleted remove
+rename move duplicate copy paste cut undo redo select selection search find replace filter filters sort
+group view views show hide expand collapse zoom print preview share send sent receive received reply forward
+attach inbox outbox sent drafts trash junk spam archive label labels flag flagged read unread starred important
+contacts contact address book group channel channels message messages chat thread threads conversation
+notification notifications settings preferences options account profile user users sign signin signout
+log in out help guide about window windows tab tabs panel sidebar toolbar menu bar tools
+format insert data table chart charts formula formulas column columns row rows cell cells range sum average
+text paragraph heading title titles subtitle header footer style styles font list bullet numbered shape
+comment comments track changes untitled read only compatibility mode
+home dashboard details detail history activity loading error errors warning warnings confirm cancel ok done
+complete completed ready waiting blocked active inactive enabled disabled free trial
+today tomorrow yesterday week weeks month months year years day days date dates
+# --- web e servizi
+mail email posta elettronica gmail calendar drive docs sheets slides forms meet keep photos maps translate
+portale portal area riservata clienti fornitori login account dashboard admin console pannello di controllo
+shop store negozio carrello cart checkout pagamento sicuro ordine conferma
+wiki forum community feed timeline profilo
+# --- parole comuni varie
+lavoro lavori lavorare personale personali famiglia casa viaggio viaggi treno volo hotel prenotazione prenotazioni
+spesa lista spesa ricetta ricette libro libri lettura film musica podcast episodio episodi
+problema problemi soluzione soluzioni idea idee prova prove test esempio esempi modello modelli template
+generale generali principale principali importante urgente urgenti priorità alta media bassa
+nuovo vecchio grande piccolo lungo breve breve veloce lento pieno vuoto aperto completo parziale
+inizio fine metà parte parti punto punti numero numeri valore valori stato stati tipo tipi nome nomi
+cognome indirizzo telefono cellulare città cap paese nazione via piazza corso
+italiano inglese italia europa
+work job personal family home travel trip train flight booking bookings recipe book books film music
+problem problems solution solutions idea ideas example examples model models template templates sample
+general main important urgent priority high medium low big small long short fast slow full empty partial
+start end part parts point points number numbers value values status state type types name names
+first last address phone mobile city country street
+# --- verbi comuni e participi
+fare fatto fatta fai fanno controllare controllo controlla verifica verificare verificato aggiornare aggiornato
+aggiornamento aggiornamenti inviare ricevere preparare preparato preparazione compilare compilato compilazione
+registrare registrato registrazione approvare approvato approvazione rivedere rivisto leggere letto scrivere scritto
+calcolare calcolo calcoli confrontare confronto controlli correggere corretto
+do done make made check checked update updated updates prepare prepared fill filled register registered
+approve review reviewed write written calculate calculation compare comparison fix fixed
+# --- interfaccia, ancora: pulsanti, voci di menu e campi frequenti
+avanti indietro successivo precedente continua procedi salta ripristina riprova aggiorna ricarica conferma
+accetto accetta rifiuta rifiutato consenti blocca sblocca attiva disattiva abilita disabilita imposta
+scegli seleziona sfoglia allega aggiungi rimuovi togli inserisci compila svuota pulisci azzera reimposta
+next back previous continue proceed skip restore retry refresh reload accept decline allow deny block
+unblock enable disable set choose browse add clear reset submit apply save changes discard
+nome utente password dimenticata ricordami email indirizzo email numero di telefono data di nascita
+codice fiscale partita iva ragione sociale sede legale descrizione causale quantità unità misura
+username forgot remember birthday description reason quantity unit measure notes comments
+oggetto destinatario destinatari mittente ccn cc firma risposta automatica fuori sede
+subject recipient recipients sender bcc signature automatic out of office
+importante promemoria ricorrente ricorrenza invito invitati partecipanti partecipante luogo
+reminder recurring invite invited guests participants location room
+stampa stampante scanner scansione scansioni scansionato scan scanned printer
+caricato caricata caricati caricate scaricato scaricata scaricati scaricate esportato esportata
+uploaded downloaded exported imported attached
+apertura chiusura creazione creato creata eliminazione modificata salvata spostato spostata rinominato
+opening closing creation created removal modified moved renamed
+# --- dati e numeri
+anno fiscale esercizio periodo trimestre semestre bimestre quadrimestre
+year fiscal period quarter semester half
+percentuale percentuali tasso media mediana minimo massimo somma totale parziale
+percent percentage minimum maximum
+euro eur usd dollari dollars sterline
+# --- lavoro digitale
+server sito web dominio hosting backup database script codice repository branch commit deploy versione
+bug fix feature release rilascio test prova ambiente produzione sviluppo staging
+web domain hosting repository deploy production development environment
+accesso password credenziali chiave chiavi token sicurezza privacy
+access credentials key keys security
+url mancante mancano manca missing
+vedi vedere visto guarda guardare leggi trovare trovato usa usare uso cerca cercare passa passare
+see look use find
+
+[app]
+mail
+anteprima
+preview
+safari
+chrome
+google chrome
+arc
+firefox
+edge
+microsoft edge
+brave
+vivaldi
+opera
+finder
+calendario
+calendar
+note
+notes
+promemoria
+reminders
+textedit
+pages
+numbers
+keynote
+terminale
+terminal
+impostazioni
+system settings
+foto
+photos
+contatti
+contacts
+messaggi
+facetime
+musica
+music
+podcast
+mappe
+maps
+excel
+microsoft excel
+word
+microsoft word
+powerpoint
+microsoft powerpoint
+outlook
+microsoft outlook
+teams
+microsoft teams
+onenote
+slack
+notion
+zoom
+acrobat
+adobe acrobat
+adobe acrobat reader
+figma
+spotify
+vscode
+visual studio code
+iterm
+claude
+chatgpt
+trello
+asana
+dropbox
+google drive
+onedrive
+whatsapp
+telegram
+signal
+discord
+skype
+1password
+bitwarden
+keychain access
+accesso portachiavi

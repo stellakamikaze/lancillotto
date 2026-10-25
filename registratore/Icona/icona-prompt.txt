@@ -1,0 +1,9 @@
+Design a macOS app icon (1024x1024 PNG, the standard macOS rounded-square "squircle" shape with transparent corners) for "Lancillotto", a small companion app to "Arturo" (an Italian assistant named after the star Arcturus, "the navigators' star").
+
+Visual world to follow exactly (Arturo's design system):
+- Background: pale sky blue #d7ebff, flat, with a very thin blue (#0b5fff) constellation grid/line pattern, like a celestial chart: straight thin lines joining small dots.
+- One single orange star (#f2a24a), small, the only warm accent.
+- Main subject: a stylized knight's lance (Lancillotto = Lancelot) drawn as a clean, thin, geometric line in near-black ink (#0b0d10), diagonal from bottom-left to top-right, whose tip points to the orange star, as if the lance were one of the constellation lines. A tiny pennant flag on the lance in #0b5fff.
+- Style: flat, precise, editorial, technical-drawing feel, generous empty space, no gradients, no 3D, no glow, no text, no letters.
+- Must read clearly at 32x32 pixels: keep the lance and star bold enough.
+Produce 1 image. Save it as icona-a.png

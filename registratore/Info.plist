@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>it</string>
+	<key>CFBundleExecutable</key>
+	<string>Lancillotto</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.stellakamikaze.lancillotto</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Lancillotto</string>
+	<key>CFBundleDisplayName</key>
+	<string>Lancillotto</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.2.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.0</string>
+	<key>CFBundleIconFile</key>
+	<string>Lancillotto</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Il registro resta su questo Mac. Dati d'uso da un elenco chiuso solo se dici sì.</string>
+	<key>NSScreenCaptureUsageDescription</key>
+	<string>Facoltativo: Lancillotto legge il testo della finestra attiva quando non lo dà l'Accessibilità. Nessuna immagine va su disco.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Lancillotto annota quali file arrivano in Download e da quale sito, mai il loro contenuto.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Lancillotto annota quali file crei, sposti o rinomini in Documenti, mai il loro contenuto.</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Lancillotto annota quali file crei, sposti o rinomini sulla Scrivania, mai il loro contenuto.</string>
+</dict>
+</plist>
